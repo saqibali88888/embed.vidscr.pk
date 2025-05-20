@@ -46,6 +46,18 @@ declare global {
   }
 }
 
+interface PlayerProps {
+  option: Option;
+  getInstance?: (art: Artplayer) => void;
+  artRef: React.RefObject<HTMLDivElement>;
+  sub?: any[];
+  posterUrl?: string;
+  availableLang?: string[];
+  onLanguageChange?: (lang: string) => void;
+  [key: string]: any;
+  currentLang?: string;
+}
+
 export default function Player({
   option,
   getInstance,
@@ -54,16 +66,18 @@ export default function Player({
   posterUrl, // Add this prop
   availableLang = [], // Add this prop with default empty array
   onLanguageChange, // Add this prop
+  currentLang = '', // Add this prop
   ...rest
 }: {
   option: Option;
   getInstance?: (art: Artplayer) => void;
-  artRef: any;
+  artRef: React.RefObject<HTMLDivElement>;
   sub?: any;
   posterUrl?: string; // Add this prop
   availableLang?: string[]; // Add this to the type
   onLanguageChange?: (lang: string) => void; // Add this to the type
   [key: string]: any;
+  currentLang?: string;
 }) {
   useEffect(() => {
 
@@ -375,7 +389,7 @@ export default function Player({
                   text-rendering: optimizeLegibility; 
                   text-shadow: none !important;
                 ">
-                  <span>${availableLang[0] || "Select Language"}</span>
+                  <span>${currentLang || availableLang[0] || "Select Language"}</span>
                   <svg fill="#000000" width="15px" height="15px" viewBox="-6.5 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>dropdown</title> <path d="M18.813 11.406l-7.906 9.906c-0.75 0.906-1.906 0.906-2.625 0l-7.906-9.906c-0.75-0.938-0.375-1.656 0.781-1.656h16.875c1.188 0 1.531 0.719 0.781 1.656z"></path> </g></svg>
                 </div>
                 <div class="lang-options" style="
