@@ -208,10 +208,10 @@ useEffect(() => {
                   },
                   selector: availableLang.map((lang: string, index: number) => ({
                     default: lang === currentLang || (index === 0 && !currentLang),
-                    html: "",
+                    html: lang,
                     value: lang,
                   })),
-                  onSelect: (item) => setCurrentLang(item.value),
+                  onSelect: (selector: any) => setCurrentLang(selector.value),
                 }, 
               ],
               playbackRate: true,
