@@ -126,14 +126,26 @@ export async function playMovie(id: string, lang: string) {
     const mediaInfo = await getMediaInfo(id);
     if (mediaInfo?.success) {
       const playlist = mediaInfo?.data?.playlist;
-      let file = playlist.find((item: any) => item?.title === lang);
+
+      // Case-insensitive search with fallback
+      const searchLang = lang?.toLowerCase();
+
+     let file = playlist.find((item: any) => 
+        item.title.toLowerCase() === searchLang
+      ) || playlist[0];
+
+       // Filter valid languages
+      const availableLang = playlist
+        .map((item: any) => item.title)
+        .filter((title: string) => title?.length > 0);
+
       if (!file) {
         file = playlist?.[0];
       }
       if (!file) {
         return { success: false, error: "No file found" };
       }
-      const availableLang = playlist.map((item: any) => item?.title);
+      
       const key = mediaInfo?.data?.key;
       const streamUrl = await getStreamUrl(file?.file, key);
       if (streamUrl?.success) {
@@ -150,16 +162,40 @@ export async function playMovie(id: string, lang: string) {
   }
 }
 
+interface EpisodeFile {
+  title: string;
+  file: string;
+}
+
+interface EpisodeFolder {
+  episode: string;
+  folder: EpisodeFile[];
+}
+
+interface SeasonData {
+  id: string;
+  folder: EpisodeFolder[];
+}
+
+interface MediaInfoResponse {
+  success: boolean;
+  data?: {
+    playlist: SeasonData[];
+    key: string;
+  };
+  error?: string;
+}
+
 // play episode
 export async function playEpisode(
   id: string,
   season: number,
   episode: number,
-  lang: string
+  lang: string = ""
 ) {
   try {
-    const mediaInfo = await getMediaInfo(id);
-    if (!mediaInfo?.success) {
+    const mediaInfo: MediaInfoResponse = await getMediaInfo(id);
+    if (!mediaInfo?.success || !mediaInfo.data?.playlist) {
       return { success: false, error: "No media info found" };
     }
     const playlist = mediaInfo?.data?.playlist;
@@ -175,7 +211,9 @@ export async function playEpisode(
     if (!getEpisode) {
       return { success: false, error: "No episode found" };
     }
-    let file = getEpisode?.folder.find((item: any) => item?.title === lang);
+
+    const langLower = lang?.toLowerCase() || "";
+    let file = getEpisode?.folder.find((item: any) => item?.title?.toLowerCase() === langLower);
     if (!file) {
       file = getEpisode?.folder?.[0];
     }
@@ -192,7 +230,9 @@ export async function playEpisode(
       return {
         success: true,
         data: streamUrl?.data,
-        availableLang: filterLang,
+        availableLang: getEpisode.folder
+            .map(f => f.title)
+            .filter(title => title?.length > 0)
       };
     } else {
       return { success: false, error: "No stream url found" };
